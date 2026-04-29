@@ -1,0 +1,40 @@
+<aside class="admin-sidebar">
+  <div class="admin-logo">
+    <div class="admin-logo-inner">
+      <img src="/images/avatar.svg" alt="logo" class="admin-logo-img">
+      <div>
+        <div class="admin-logo-text"><%= blogName %></div>
+        <div class="admin-logo-sub">管理后台</div>
+      </div>
+    </div>
+  </div>
+  <nav class="admin-nav">
+    <div class="admin-nav-section">内容管理</div>
+    <a href="/admin" class="<%= title==='仪表盘'?'active':'' %>">
+      <span class="nav-icon">🏠</span>仪表盘
+    </a>
+    <a href="/admin/articles/new" class="<%= title==='新建文章'?'active':'' %>">
+      <span class="nav-icon">✏️</span>写文章
+    </a>
+    <a href="/admin/articles" class="<%= title==='文章管理'?'active':'' %>">
+      <span class="nav-icon">📝</span>文章管理
+    </a>
+    <a href="/admin/comments" class="<%= title==='评论管理'?'active':'' %>">
+      <span class="nav-icon">💬</span>评论管理
+    </a>
+    <a href="/admin/categories" class="<%= title==='分类管理'?'active':'' %>">
+      <span class="nav-icon">📁</span>分类管理
+    </a>
+    <div class="admin-nav-section">系统</div>
+    <a href="/admin/settings" class="<%= title==='博客设置'?'active':'' %>">
+      <span class="nav-icon">⚙️</span>博客设置
+    </a>
+    <a href="/" target="_blank">
+      <span class="nav-icon">👁</span>查看博客
+    </a>
+    <a href="/admin/logout" class="logout">
+      <span class="nav-icon">🚪</span>退出登录
+    </a>
+  </nav>
+  <button class="admin-hamburger" onclick="toggleNav()" style="display:none">☰</button>
+</aside>

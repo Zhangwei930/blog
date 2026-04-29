@@ -1,0 +1,49 @@
+<%- include('../partials/admin-head') %>
+<div class="admin-layout">
+<%- include('../partials/admin-sidebar') %>
+<main class="admin-main">
+  <div class="admin-topbar">
+    <div class="admin-topbar-title">评论管理</div>
+    <div class="admin-topbar-right">
+      <span style="font-size:13px;color:var(--text-muted)">待审核：<strong style="color:#dd6b20"><%= counts.pending %></strong></span>
+    </div>
+  </div>
+  <div class="admin-content">
+    <div class="tab-bar">
+      <a href="?status=pending" class="<%= status==='pending'?'active':'' %>">⏳ 待审核 (<%= counts.pending %>)</a>
+      <a href="?status=approved" class="<%= status==='approved'?'active':'' %>">✅ 已通过 (<%= counts.approved %>)</a>
+      <a href="?status=spam" class="<%= status==='spam'?'active':'' %>">🚫 垃圾 (<%= counts.spam %>)</a>
+    </div>
+    <% comments.forEach(c => { %>
+      <div class="comment-panel">
+        <div class="comment-meta">
+          <strong><%= c.author_name %></strong>
+          <% if(c.author_email){%><span class="meta-email">&lt;<%= c.author_email %>&gt;</span><%}%>
+          <span class="meta-article">评论了《<a href="/article/<%= c.article_slug %>" target="_blank" style="color:var(--primary)"><%= c.article_title %></a>》</span>
+          <time><%= dayjs(c.created_at).format('YYYY-MM-DD HH:mm') %></time>
+        </div>
+        <p class="comment-text"><%= c.content %></p>
+        <div class="comment-actions">
+          <% if(c.status!=='approved'){%>
+            <form method="POST" action="/admin/comments/<%= c.id %>/approve" style="display:inline">
+              <button class="btn btn-success btn-sm">✓ 批准</button>
+            </form>
+          <%}%>
+          <% if(c.status!=='spam'){%>
+            <form method="POST" action="/admin/comments/<%= c.id %>/spam" style="display:inline">
+              <button class="btn btn-warn btn-sm">🚫 垃圾</button>
+            </form>
+          <%}%>
+          <form method="POST" action="/admin/comments/<%= c.id %>/delete" style="display:inline" onsubmit="return confirm('确定删除这条评论？')">
+            <button class="btn btn-danger btn-sm">🗑 删除</button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+    <% if(comments.length===0){%>
+      <div class="empty-state"><div class="empty-state-icon"><%= status==='pending'?'✅':'📭' %></div><p><%= status==='pending'?'暂无待审评论':'暂无内容' %></p></div>
+    <%}%>
+  </div>
+</main>
+</div>
+</body></html>

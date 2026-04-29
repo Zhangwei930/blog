@@ -1,0 +1,90 @@
+const express = require('express');
+const router = express.Router();
+const { db } = require('../database');
+const { marked } = require('marked');
+const dayjs = require('dayjs');
+
+function getSetting(key) {
+  const row = db.prepare('SELECT value FROM settings WHERE key=?').get(key);
+  return row ? row.value : '';
+}
+
+function getBaseData() {
+  return {
+    blogName: getSetting('blog_name'),
+    blogDesc: getSetting('blog_description'),
+    blogAuthor: getSetting('blog_author'),
+    blogAvatar: getSetting('blog_avatar'),
+    footerText: getSetting('footer_text'),
+    icpNumber: getSetting('icp_number'),
+    categories: db.prepare('SELECT c.*, COUNT(a.id) as article_count FROM categories c LEFT JOIN articles a ON a.category_id=c.id AND a.status='published' GROUP BY c.id ORDER BY article_count DESC').all(),
+    recentArticles: db.prepare('SELECT id,title,slug,created_at FROM articles WHERE status='published' ORDER BY created_at DESC LIMIT 5').all(),
+    dayjs
+  };
+}
+
+// 首页
+router.get('/', (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const perPage = parseInt(getSetting('posts_per_page')) || 10;
+  const offset = (page - 1) * perPage;
+  const total = db.prepare('SELECT COUNT(*) as c FROM articles WHERE status='published'').get().c;
+  const articles = db.prepare(`
+    SELECT a.*, c.name as category_name, c.slug as category_slug
+    FROM articles a LEFT JOIN categories c ON a.category_id=c.id
+    WHERE a.status='published' ORDER BY a.created_at DESC LIMIT ? OFFSET ?
+  `).all(perPage, offset);
+  res.render('index', { ...getBaseData(), articles, page, totalPages: Math.ceil(total / perPage), category: null, tag: null });
+});
+
+// 文章详情
+router.get('/article/:slug', (req, res) => {
+  const article = db.prepare(`
+    SELECT a.*, c.name as category_name, c.slug as category_slug
+    FROM articles a LEFT JOIN categories c ON a.category_id=c.id
+    WHERE a.slug=? AND a.status='published'
+  `).get(req.params.slug);
+  if (!article) return res.status(404).render('404', { title: '文章未找到', ...getBaseData() });
+  db.prepare('UPDATE articles SET views=views+1 WHERE id=?').run(article.id);
+  article.content_html = marked.parse(article.content);
+  const comments = db.prepare('SELECT * FROM comments WHERE article_id=? AND status='approved' ORDER BY created_at ASC').all(article.id);
+  const tags = db.prepare('SELECT t.* FROM tags t JOIN article_tags at ON t.id=at.tag_id WHERE at.article_id=?').all(article.id);
+  const prev = db.prepare('SELECT id,title,slug FROM articles WHERE status='published' AND id<? ORDER BY id DESC LIMIT 1').get(article.id);
+  const next = db.prepare('SELECT id,title,slug FROM articles WHERE status='published' AND id>? ORDER BY id ASC LIMIT 1').get(article.id);
+  res.render('article', { ...getBaseData(), article, comments, tags, prev, next, commentModeration: getSetting('comment_moderation') === 'true' });
+});
+
+// 分类页
+router.get('/category/:slug', (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const perPage = parseInt(getSetting('posts_per_page')) || 10;
+  const offset = (page - 1) * perPage;
+  const category = db.prepare('SELECT * FROM categories WHERE slug=?').get(req.params.slug);
+  if (!category) return res.status(404).render('404', { title: '分类未找到', ...getBaseData() });
+  const total = db.prepare('SELECT COUNT(*) as c FROM articles WHERE category_id=? AND status='published'').get(category.id).c;
+  const articles = db.prepare(`
+    SELECT a.*, c.name as category_name, c.slug as category_slug
+    FROM articles a LEFT JOIN categories c ON a.category_id=c.id
+    WHERE a.category_id=? AND a.status='published' ORDER BY a.created_at DESC LIMIT ? OFFSET ?
+  `).all(category.id, perPage, offset);
+  res.render('index', { ...getBaseData(), articles, page, totalPages: Math.ceil(total / perPage), category, tag: null });
+});
+
+// 归档页
+router.get('/archive', (req, res) => {
+  const articles = db.prepare('SELECT id,title,slug,created_at,category_id FROM articles WHERE status='published' ORDER BY created_at DESC').all();
+  const grouped = {};
+  articles.forEach(a => {
+    const year = dayjs(a.created_at).format('YYYY');
+    if (!grouped[year]) grouped[year] = [];
+    grouped[year].push(a);
+  });
+  res.render('archive', { ...getBaseData(), grouped, title: '文章归档' });
+});
+
+// 关于页
+router.get('/about', (req, res) => {
+  res.render('about', { ...getBaseData(), title: '关于我', aboutContent: getSetting('about_content') || '# 关于我\n\n这里是 Magies。' });
+});
+
+module.exports = router;

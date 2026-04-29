@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="<%= blogDesc %>">
+  <title><%= title ? title+' - ' : '' %><%= blogName %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/knowledge.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="kb-body">
+<header class="kb-header">
+  <div class="kb-header-inner">
+    <a href="/" class="kb-logo">
+      <% if (blogAvatar) { %><img src="<%= blogAvatar %>" alt="logo" class="kb-logo-img"><% } %>
+      <span class="kb-logo-name"><%= blogName %></span>
+    </a>
+    <nav class="kb-nav">
+      <a href="/" class="active">首页</a>
+      <a href="/archive">归档</a>
+      <% categories.slice(0,5).forEach(cat => { %><a href="/category/<%= cat.slug %>"><%= cat.name %></a><% }) %>
+      <a href="/about">关于</a>
+    </nav>
+    <button class="kb-menu-toggle" onclick="document.querySelector('.kb-nav').classList.toggle('open')">☰</button>
+  </div>
+</header>
+
+<% if (!category) { %>
+<div class="kb-hero">
+  <div class="kb-hero-inner">
+    <div class="kb-hero-content">
+      <div class="kb-hero-eyebrow">PERSONAL BLOG</div>
+      <h1 class="kb-hero-title"><%= blogName %></h1>
+      <p class="kb-hero-desc"><%= blogDesc %></p>
+      <div class="kb-hero-stats">
+        <div class="kb-stat"><span class="kb-stat-num"><%= totalArticles %></span><span class="kb-stat-label">篇文章</span></div>
+        <div class="kb-stat"><span class="kb-stat-num"><%= categories.length %></span><span class="kb-stat-label">个分类</span></div>
+        <div class="kb-stat"><span class="kb-stat-num"><%= totalViews %></span><span class="kb-stat-label">次阅读</span></div>
+      </div>
+    </div>
+    <div class="kb-hero-deco">
+      <div class="kb-deco-sq"></div>
+      <div class="kb-deco-sq"></div>
+      <div class="kb-deco-sq"></div>
+      <div class="kb-deco-sq"></div>
+    </div>
+  </div>
+</div>
+
+<div class="kb-main">
+  <% if (categoryGroups && categoryGroups.length > 0) { %>
+    <div class="kb-section-hd"><h2>📂 知识分类</h2></div>
+    <div class="kb-grid">
+      <% categoryGroups.forEach(group => { %>
+        <div class="kb-card">
+          <div class="kb-card-header">
+            <span class="kb-card-icon">📄</span>
+            <h3 class="kb-card-title"><a href="/category/<%= group.slug %>"><%= group.name %></a></h3>
+            <span class="kb-card-count"><%= group.total %> 篇</span>
+          </div>
+          <ul class="kb-article-list">
+            <% if (group.articles.length === 0) { %>
+              <li class="kb-article-empty">暂无文章，快来创作第一篇</li>
+            <% } else { %>
+              <% group.articles.forEach(a => { %>
+                <li class="kb-article-item">
+                  <a href="/article/<%= a.slug %>" class="kb-article-link"><%= a.title %></a>
+                  <span class="kb-article-views"><%= a.views %> 阅读</span>
+                </li>
+              <% }) %>
+            <% } %>
+          </ul>
+          <% if (group.total > group.articles.length) { %>
+            <a href="/category/<%= group.slug %>" class="kb-card-more">查看全部 <%= group.total %> 篇 →</a>
+          <% } %>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+
+  <% if (latestArticles && latestArticles.length > 0) { %>
+    <div class="kb-section-hd"><h2>🆕 最新发布</h2></div>
+    <div class="kb-latest-grid">
+      <% latestArticles.forEach(a => { %>
+        <a href="/article/<%= a.slug %>" class="kb-latest-card">
+          <div class="kb-latest-cover" style="background:<%= a.cover_image ? 'url('+a.cover_image+') center/cover' : 'linear-gradient(135deg,#fdf0e8,#e8d5c4)' %>;display:flex;align-items:center;justify-content:center">
+            <% if (!a.cover_image) { %><span style="font-size:36px">📝</span><% } %>
+          </div>
+          <div class="kb-latest-body">
+            <div class="kb-latest-meta">
+              <% if (a.category_name) { %><span class="kb-latest-cat"><%= a.category_name %></span><% } %>
+              <span class="kb-latest-views">👁 <%= a.views %></span>
+            </div>
+            <h3 class="kb-latest-title"><%= a.title %></h3>
+            <p class="kb-latest-excerpt"><%= a.excerpt || '' %></p>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<% } else { %>
+<div class="kb-page-wrap">
+  <div class="kb-page-hd">
+    <h1>📂 <%= category.name %></h1>
+    <% if (category.description) { %><p><%= category.description %></p><% } %>
+    <span class="kb-page-count">共 <%= articles.length %> 篇</span>
+  </div>
+  <div class="kb-list-card">
+    <% articles.forEach(a => { %>
+      <div class="kb-list-item">
+        <a href="/article/<%= a.slug %>" class="kb-list-link"><%= a.title %></a>
+        <span class="kb-list-views"><%= a.views %> 阅读</span>
+      </div>
+    <% }) %>
+    <% if (articles.length === 0) { %>
+      <div style="text-align:center;padding:32px;color:#aaa">暂无文章</div>
+    <% } %>
+  </div>
+  <% if (totalPages > 1) { %>
+    <div class="kb-pagination">
+      <% if (page>1) { %><a href="?page=<%= page-1 %>" class="kb-btn">← 上一页</a><% } %>
+      <span class="kb-page-info">第 <%= page %> / <%= totalPages %> 页</span>
+      <% if (page<totalPages) { %><a href="?page=<%= page+1 %>" class="kb-btn">下一页 →</a><% } %>
+    </div>
+  <% } %>
+</div>
+<% } %>
+
+<footer class="kb-footer">
+  <p><%= footerText %></p>
+  <% if (icpNumber) { %><p><a href="https://beian.miit.gov.cn" target="_blank"><%= icpNumber %></a></p><% } %>
+</footer>
+<script src="/js/main.js"></script>
+</body></html>

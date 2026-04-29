@@ -1,0 +1,7 @@
+node_modules/
+data/blog.db
+.env
+logs/
+backups/
+public/uploads/
+*.log

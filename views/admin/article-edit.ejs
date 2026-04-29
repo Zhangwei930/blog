@@ -1,0 +1,89 @@
+<%- include('../partials/admin-head') %>
+<div class="admin-layout">
+<%- include('../partials/admin-sidebar') %>
+<main class="admin-main">
+  <div class="admin-topbar">
+    <div class="admin-topbar-title"><%= article ? '编辑文章' : '新建文章' %></div>
+    <div class="admin-topbar-right">
+      <a href="/admin/articles" class="btn btn-ghost btn-sm">← 返回列表</a>
+    </div>
+  </div>
+  <div class="admin-content">
+    <form method="POST" action="/admin/articles/<%= article ? article.id+'/edit' : 'new' %>" enctype="multipart/form-data">
+      <div class="edit-layout">
+        <div class="edit-main">
+          <input type="text" name="title" value="<%= article?article.title:'' %>" placeholder="文章标题..." required class="title-input">
+          <div>
+            <div class="editor-toolbar">
+              <button type="button" onclick="ins('**','**')" title="加粗"><b>B</b></button>
+              <button type="button" onclick="ins('*','*')" title="斜体"><i>I</i></button>
+              <button type="button" onclick="ins('## ','')">H2</button>
+              <button type="button" onclick="ins('### ','')">H3</button>
+              <button type="button" onclick="ins('[链接](','http://)')">链接</button>
+              <button type="button" onclick="ins('\`','\`')">代码</button>
+              <button type="button" onclick="ins('\`\`\`\n','\n\`\`\`')">代码块</button>
+              <button type="button" onclick="ins('> ','')">引用</button>
+              <button type="button" onclick="ins('- ','')">列表</button>
+              <button type="button" onclick="document.getElementById('img-upload').click()">🖼 图片</button>
+              <input type="file" id="img-upload" accept="image/*" style="display:none" onchange="doUpload(this)">
+            </div>
+            <textarea name="content" id="editor" placeholder="开始写作... 支持 Markdown 语法"><%= article?article.content:'' %></textarea>
+          </div>
+          <div class="panel">
+            <label class="form-label">文章摘要（可选）</label>
+            <textarea name="excerpt" rows="3" placeholder="简短描述，不填则自动截取正文前200字"><%= article?article.excerpt:'' %></textarea>
+          </div>
+        </div>
+
+        <div class="edit-sidebar-col">
+          <div class="panel">
+            <h4>发布设置</h4>
+            <label class="form-label">状态</label>
+            <select name="status" style="margin-bottom:12px">
+              <option value="draft" <%= (!article||article.status==='draft')?'selected':'' %>>📋 保存草稿</option>
+              <option value="published" <%= (article&&article.status==='published')?'selected':'' %>>✅ 立即发布</option>
+            </select>
+            <button type="submit" class="btn btn-primary btn-full" style="padding:11px">💾 保存</button>
+          </div>
+
+          <div class="panel">
+            <h4>所属分类</h4>
+            <select name="category_id">
+              <option value="">— 无分类 —</option>
+              <% categories.forEach(c => { %>
+                <option value="<%= c.id %>" <%= (article&&article.category_id===c.id)?'selected':'' %>><%= c.name %></option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="panel">
+            <h4>文章标签</h4>
+            <div class="tag-container" id="tag-container">
+              <% selectedTags.forEach(t => { %>
+                <span class="tag-item"><%= t %><input type="hidden" name="tags" value="<%= t %>"><button type="button" onclick="this.parentElement.remove()">×</button></span>
+              <% }) %>
+            </div>
+            <input type="text" id="tag-input" placeholder="输入标签，回车确认...">
+          </div>
+
+          <div class="panel">
+            <h4>封面图片</h4>
+            <% if (article&&article.cover_image) { %>
+              <img src="<%= article.cover_image %>" style="width:100%;border-radius:6px;margin-bottom:10px;object-fit:cover;max-height:120px">
+            <% } %>
+            <input type="file" name="cover_image" accept="image/*" style="width:100%;font-size:12.5px">
+            <p style="font-size:11.5px;color:var(--text-muted);margin-top:6px">建议尺寸 1200×630px</p>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</main>
+</div>
+<script>
+function ins(b,a){const t=document.getElementById('editor');const s=t.selectionStart,e=t.selectionEnd;const sel=t.value.substring(s,e);t.value=t.value.substring(0,s)+b+sel+a+t.value.substring(e);t.focus();t.setSelectionRange(s+b.length,s+b.length+sel.length);}
+function addTag(e){if(e.key!=='Enter')return;e.preventDefault();const v=e.target.value.trim();if(!v)return;const d=document.getElementById('tag-container');const sp=document.createElement('span');sp.className='tag-item';sp.innerHTML=v+'<input type="hidden" name="tags" value="'+v+'"><button type="button" onclick="this.parentElement.remove()">×</button>';d.appendChild(sp);e.target.value='';}
+document.getElementById('tag-input').addEventListener('keydown',addTag);
+async function doUpload(input){const fd=new FormData();fd.append('image',input.files[0]);const r=await fetch('/admin/upload',{method:'POST',credentials:'same-origin',body:fd});const d=await r.json();if(d.success)ins('![图片]('+d.url+')','');}
+</script>
+</body></html>

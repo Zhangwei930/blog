@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>文章归档 - <%= blogName %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/knowledge.css">
+</head>
+<body class="kb-body">
+
+<header class="kb-header">
+  <div class="kb-header-inner">
+    <a href="/" class="kb-logo">
+      <% if (blogAvatar) { %><img src="<%= blogAvatar %>" alt="logo" class="kb-logo-img"><% } %>
+      <span class="kb-logo-name"><%= blogName %></span>
+    </a>
+    <nav class="kb-nav">
+      <a href="/">首页</a>
+      <a href="/archive" class="active">归档</a>
+      <% categories.slice(0,5).forEach(cat => { %><a href="/category/<%= cat.slug %>"><%= cat.name %></a><% }) %>
+      <a href="/about">关于</a>
+    </nav>
+    <button class="kb-menu-toggle" onclick="document.querySelector('.kb-nav').classList.toggle('open')">☰</button>
+  </div>
+</header>
+
+<div style="flex:1;max-width:1280px;margin:0 auto;padding:40px 40px 72px;width:100%">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:28px;padding-bottom:18px;border-bottom:2px solid #c05a1f">
+    <h1 style="font-size:26px;font-weight:700;color:#1a1208;font-family:'Noto Serif SC',serif;margin:0">文章归档</h1>
+    <span style="font-size:13px;color:#aaa;margin-left:auto">共 <%= Object.values(grouped).reduce((a,b)=>a+b.length,0) %> 篇文章</span>
+  </div>
+
+  <% Object.keys(grouped).sort((a,b)=>b-a).forEach(year => { %>
+    <div style="margin-bottom:32px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+        <span style="font-size:22px;font-weight:700;color:#c05a1f;font-family:'Noto Serif SC',serif"><%= year %></span>
+        <span style="font-size:13px;color:#aaa;background:#f5f0ea;padding:2px 10px;border-radius:20px"><%= grouped[year].length %> 篇</span>
+      </div>
+      <div style="background:#fff;border:1px solid #e8e0d8;border-radius:12px;overflow:hidden">
+        <% grouped[year].forEach(a => { %>
+          <div style="display:flex;align-items:center;gap:20px;padding:13px 22px;border-bottom:1px solid #f7f4f0;transition:background .15s" onmouseover="this.style.background='#fdf8f4'" onmouseout="this.style.background='#fff'">
+            <span style="font-size:13px;color:#bbb;min-width:44px;flex-shrink:0"><%= dayjs(a.created_at).format('MM-DD') %></span>
+            <a href="/article/<%= a.slug %>" style="font-size:14.5px;color:#2d2520;text-decoration:none;flex:1;transition:color .2s" onmouseover="this.style.color='#c05a1f'" onmouseout="this.style.color='#2d2520'"><%= a.title %></a>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  <% }) %>
+</div>
+
+<footer class="kb-footer">
+  <p><%= footerText %></p>
+  <% if (icpNumber) { %><p><a href="https://beian.miit.gov.cn" target="_blank"><%= icpNumber %></a></p><% } %>
+</footer>
+</body></html>

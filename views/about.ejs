@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>关于 - <%= blogName %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/knowledge.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    html, body { height: 100%; }
+    .about-layout { display: flex; flex-direction: column; min-height: 100vh; }
+    .about-content { flex: 1; }
+  </style>
+</head>
+<body class="kb-body about-layout">
+
+<header class="kb-header">
+  <div class="kb-header-inner">
+    <a href="/" class="kb-logo">
+      <% if (blogAvatar) { %><img src="<%= blogAvatar %>" alt="logo" class="kb-logo-img"><% } %>
+      <span class="kb-logo-name"><%= blogName %></span>
+    </a>
+    <nav class="kb-nav">
+      <a href="/">首页</a>
+      <a href="/archive">归档</a>
+      <% categories.slice(0,5).forEach(cat => { %><a href="/category/<%= cat.slug %>"><%= cat.name %></a><% }) %>
+      <a href="/about" class="active">关于</a>
+    </nav>
+    <button class="kb-menu-toggle" onclick="document.querySelector('.kb-nav').classList.toggle('open')">☰</button>
+  </div>
+</header>
+
+<div class="about-content">
+  <div style="max-width:1280px;margin:0 auto;padding:40px 40px 72px;width:100%">
+    <div style="margin-bottom:28px;padding-bottom:18px;border-bottom:2px solid #c05a1f">
+      <h1 style="font-size:26px;font-weight:700;color:#1a1208;font-family:'Noto Serif SC',serif;margin:0">关于我</h1>
+    </div>
+    <div class="about-grid" style="display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:start">
+      <!-- 左侧名片 -->
+      <div class="about-sidebar" style="background:#fff;border:1px solid #e8e0d8;border-radius:14px;padding:28px 20px;text-align:center;position:sticky;top:80px">
+        <% if (blogAvatar) { %>
+          <img src="<%= blogAvatar %>" alt="avatar" style="width:76px;height:76px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 14px;border:3px solid #e8d5c4">
+        <% } %>
+        <div style="font-size:17px;font-weight:700;color:#1a1208;margin-bottom:6px;font-family:'Noto Serif SC',serif"><%= blogAuthor %></div>
+        <div style="font-size:13px;color:#aaa;line-height:1.6;margin-bottom:18px"><%= blogDesc %></div>
+        <div style="border-top:1px solid #f0ebe3;padding-top:14px;display:flex;flex-direction:column;gap:4px">
+          <a href="/archive" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:8px;color:#6b5c4e;font-size:13px;text-decoration:none;background:#faf8f5">
+            <span>📄 全部文章</span><span style="color:#c05a1f;font-weight:700"><%= recentArticles.length %></span>
+          </a>
+          <a href="/" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:8px;color:#6b5c4e;font-size:13px;text-decoration:none;background:#faf8f5">
+            <span>📂 文章分类</span><span style="color:#c05a1f;font-weight:700"><%= categories.length %></span>
+          </a>
+        </div>
+      </div>
+      <!-- 右侧正文 -->
+      <div style="background:#fff;border:1px solid #e8e0d8;border-radius:14px;padding:36px 40px;min-height:360px">
+        <div class="post-content markdown-body" id="about-md"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="kb-footer">
+  <p><%= footerText %></p>
+  <% if (icpNumber) { %><p><a href="https://beian.miit.gov.cn" target="_blank"><%= icpNumber %></a></p><% } %>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+  const raw = `<%= aboutContent.replace(/\\/g,'\\\\').replace(/`/g,'\\`') %>`;
+  document.getElementById('about-md').innerHTML = marked.parse(raw);
+</script>
+</body></html>

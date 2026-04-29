@@ -1,0 +1,25 @@
+<aside class="sidebar">
+  <div class="widget">
+    <h3 class="widget-title">关于博主</h3>
+    <div class="about-widget">
+      <% if (blogAvatar) { %><img src="<%= blogAvatar %>" alt="avatar" class="about-avatar"><% } %>
+      <p><%= blogDesc %></p>
+    </div>
+  </div>
+  <div class="widget">
+    <h3 class="widget-title">文章分类</h3>
+    <ul class="category-list">
+      <% categories.forEach(cat => { %>
+        <li><a href="/category/<%= cat.slug %>"><%= cat.name %> <span><%= cat.article_count %></span></a></li>
+      <% }) %>
+    </ul>
+  </div>
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <ul class="recent-list">
+      <% recentArticles.forEach(a => { %>
+        <li><a href="/article/<%= a.slug %>"><%= a.title %></a></li>
+      <% }) %>
+    </ul>
+  </div>
+</aside>

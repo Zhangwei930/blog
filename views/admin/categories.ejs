@@ -1,0 +1,170 @@
+<%- include('../partials/admin-head') %>
+<style>
+.cat-row { cursor: grab; transition: background .15s; }
+.cat-row:active { cursor: grabbing; }
+.cat-row.dragging { opacity: .4; background: #ebf4ff; }
+.cat-row.drag-over { border-top: 3px solid #2c7be5; }
+.drag-handle { color: #cbd5e0; font-size: 18px; cursor: grab; padding: 0 8px; user-select: none; }
+.drag-handle:hover { color: #4a5568; }
+.order-num { display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; background: #edf2f7; border-radius: 50%;
+  font-size: 12px; font-weight: 600; color: #718096; }
+.save-order-btn { display: none; }
+.save-order-btn.visible { display: inline-flex; }
+</style>
+<div class="admin-layout"><%- include('../partials/admin-sidebar') %>
+<main class="admin-main">
+  <div class="admin-header">
+    <h2>分类管理</h2>
+    <button id="save-btn" class="btn btn-primary save-order-btn" onclick="saveOrder()">💾 保存排序</button>
+  </div>
+
+  <div class="panel" style="max-width:680px;margin-bottom:24px"><h4>添加新分类</h4>
+    <form method="POST" action="/admin/categories/new"
+      style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end">
+      <div>
+        <label style="font-size:12px;color:#718096;display:block;margin-bottom:4px">分类名称 *</label>
+        <input type="text" name="name" placeholder="如：技术" required id="cat-name" oninput="autoSlug(this.value)">
+      </div>
+      <div>
+        <label style="font-size:12px;color:#718096;display:block;margin-bottom:4px">Slug *</label>
+        <input type="text" name="slug" placeholder="如：tech" required id="cat-slug"
+          pattern="[a-z0-9\-]+" title="只能用小写字母、数字、连字符">
+      </div>
+      <div>
+        <label style="font-size:12px;color:#718096;display:block;margin-bottom:4px">描述（可选）</label>
+        <input type="text" name="description" placeholder="分类描述">
+      </div>
+      <button class="btn btn-primary" style="height:36px">添加</button>
+    </form>
+    <p style="font-size:12px;color:#a0aec0;margin-top:8px">
+      Slug 用于 URL，只能包含小写字母、数字和连字符，如 tech、my-life
+    </p>
+  </div>
+
+  <div class="panel">
+    <p style="font-size:12px;color:#a0aec0;margin-bottom:12px">
+      ☰ 拖动左侧手柄调整顺序，拖动后点击「保存排序」生效
+    </p>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width:40px"></th>
+          <th style="width:48px">序号</th>
+          <th>名称</th>
+          <th>Slug</th>
+          <th>描述</th>
+          <th style="width:72px">文章数</th>
+          <th style="width:72px">操作</th>
+        </tr>
+      </thead>
+      <tbody id="cat-tbody">
+        <% categories.forEach((c, i) => { %>
+          <tr class="cat-row" data-id="<%= c.id %>">
+            <td><span class="drag-handle">☰</span></td>
+            <td><span class="order-num"><%= i + 1 %></span></td>
+            <td><strong><%= c.name %></strong></td>
+            <td><code style="background:#f1f5f9;padding:2px 8px;border-radius:4px"><%= c.slug %></code></td>
+            <td><%= c.description || '-' %></td>
+            <td style="text-align:center"><%= c.article_count %></td>
+            <td>
+              <form method="POST" action="/admin/categories/<%= c.id %>/delete"
+                style="display:inline"
+                onsubmit="return confirm('删除后该分类下文章变为无分类，确定？')">
+                <button class="btn btn-sm btn-danger">删除</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</main></div>
+
+<script>
+function autoSlug(name) {
+  const slug = document.getElementById('cat-slug');
+  const en = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  if (en) slug.value = en;
+}
+
+// ── 拖拽排序 ──────────────────────────────────────────
+let dragSrc = null;
+
+function updateOrderNums() {
+  document.querySelectorAll('#cat-tbody .order-num').forEach((el, i) => {
+    el.textContent = i + 1;
+  });
+}
+
+document.querySelectorAll('.cat-row').forEach(row => {
+  row.setAttribute('draggable', true);
+
+  row.addEventListener('dragstart', e => {
+    dragSrc = row;
+    setTimeout(() => row.classList.add('dragging'), 0);
+    e.dataTransfer.effectAllowed = 'move';
+  });
+
+  row.addEventListener('dragend', () => {
+    row.classList.remove('dragging');
+    document.querySelectorAll('.cat-row').forEach(r => r.classList.remove('drag-over'));
+    updateOrderNums();
+    document.getElementById('save-btn').classList.add('visible');
+  });
+
+  row.addEventListener('dragover', e => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (row !== dragSrc) {
+      document.querySelectorAll('.cat-row').forEach(r => r.classList.remove('drag-over'));
+      row.classList.add('drag-over');
+    }
+  });
+
+  row.addEventListener('drop', e => {
+    e.preventDefault();
+    if (dragSrc && dragSrc !== row) {
+      const tbody = document.getElementById('cat-tbody');
+      const rows  = [...tbody.querySelectorAll('.cat-row')];
+      const srcIdx = rows.indexOf(dragSrc);
+      const tgtIdx = rows.indexOf(row);
+      if (srcIdx < tgtIdx) {
+        tbody.insertBefore(dragSrc, row.nextSibling);
+      } else {
+        tbody.insertBefore(dragSrc, row);
+      }
+    }
+    row.classList.remove('drag-over');
+  });
+});
+
+async function saveOrder() {
+  const rows = [...document.querySelectorAll('#cat-tbody .cat-row')];
+  const orders = rows.map((r, i) => ({ id: parseInt(r.dataset.id), order: i + 1 }));
+  const btn = document.getElementById('save-btn');
+  btn.textContent = '保存中...';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/admin/categories/reorder', {
+      credentials: 'same-origin',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orders })
+    });
+    const d = await res.json();
+    if (d.success) {
+      btn.textContent = '✓ 已保存';
+      setTimeout(() => {
+        btn.textContent = '💾 保存排序';
+        btn.disabled = false;
+        btn.classList.remove('visible');
+      }, 1500);
+    }
+  } catch(e) {
+    btn.textContent = '保存失败，重试';
+    btn.disabled = false;
+  }
+}
+</script>
+</body></html>

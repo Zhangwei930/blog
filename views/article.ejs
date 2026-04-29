@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="<%= article.excerpt %>">
+  <title><%= article.title %> - <%= blogName %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/knowledge.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="kb-body">
+<header class="kb-header">
+  <div class="kb-header-inner">
+    <a href="/" class="kb-logo">
+      <% if (blogAvatar) { %><img src="<%= blogAvatar %>" alt="logo" class="kb-logo-img"><% } %>
+      <span class="kb-logo-name"><%= blogName %></span>
+    </a>
+    <nav class="kb-nav">
+      <a href="/">首页</a>
+      <a href="/archive">归档</a>
+      <% categories.slice(0,5).forEach(cat => { %>
+        <a href="/category/<%= cat.slug %>"><%= cat.name %></a>
+      <% }) %>
+      <a href="/about">关于</a>
+    </nav>
+    <button class="kb-menu-toggle" onclick="document.querySelector('.kb-nav').classList.toggle('open')">☰</button>
+  </div>
+</header>
+
+<div class="kb-main" style="padding-top:32px">
+  <div style="max-width:860px">
+    <!-- 面包屑 -->
+    <div style="font-size:13px;color:#aaa;margin-bottom:20px">
+      <a href="/" style="color:#c05a1f">首页</a>
+      <% if (article.category_name) { %>
+        <span style="margin:0 8px">›</span>
+        <a href="/category/<%= article.category_slug %>" style="color:#c05a1f"><%= article.category_name %></a>
+      <% } %>
+      <span style="margin:0 8px">›</span>
+      <span><%= article.title %></span>
+    </div>
+
+    <!-- 文章主体 -->
+    <div class="kb-card" style="padding:36px 40px">
+      <div class="post-meta" style="margin-bottom:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <% if (article.category_name) { %>
+          <a href="/category/<%= article.category_slug %>" class="kb-latest-cat"><%= article.category_name %></a>
+        <% } %>
+        <time style="font-size:13px;color:#aaa"><%= dayjs(article.created_at).format('YYYY年MM月DD日') %></time>
+        <span style="font-size:13px;color:#aaa">👁 <%= article.views %> 次阅读</span>
+        <span style="font-size:13px;color:#aaa">💬 <%= comments.length %> 条评论</span>
+      </div>
+      <h1 style="font-size:28px;font-weight:700;font-family:'Noto Serif SC',serif;margin:0 0 24px;color:#1a1a1a;line-height:1.4"><%= article.title %></h1>
+      <% if (article.cover_image) { %>
+        <img src="<%= article.cover_image %>" alt="<%= article.title %>" style="width:100%;border-radius:8px;margin-bottom:24px">
+      <% } %>
+      <div class="post-content markdown-body"><%- article.content_html %></div>
+      <% if (tags.length > 0) { %>
+        <div style="margin-top:24px;padding-top:20px;border-top:1px solid #f0ebe3">
+          标签：<% tags.forEach(t => { %><span class="kb-latest-cat" style="margin:4px"><%= t.name %></span><% }) %>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- 上下篇 -->
+    <div style="display:flex;gap:16px;margin:20px 0">
+      <% if (prev) { %>
+        <a href="/article/<%= prev.slug %>" class="kb-card" style="flex:1;padding:16px;text-decoration:none;display:block;transition:box-shadow .2s">
+          <div style="font-size:12px;color:#aaa;margin-bottom:6px">← 上一篇</div>
+          <div style="font-size:14px;color:#c05a1f"><%= prev.title %></div>
+        </a>
+      <% } %>
+      <% if (next) { %>
+        <a href="/article/<%= next.slug %>" class="kb-card" style="flex:1;padding:16px;text-decoration:none;display:block;text-align:right">
+          <div style="font-size:12px;color:#aaa;margin-bottom:6px">下一篇 →</div>
+          <div style="font-size:14px;color:#c05a1f"><%= next.title %></div>
+        </a>
+      <% } %>
+    </div>
+
+    <!-- 评论区 -->
+    <div class="kb-card" style="padding:32px 40px">
+      <h3 style="font-size:18px;font-weight:700;margin:0 0 20px;padding-bottom:12px;border-bottom:2px solid #c05a1f;display:inline-block">评论 (<%= comments.length %>)</h3>
+      <% comments.forEach(c => { %>
+        <div style="padding:16px 0;border-bottom:1px solid #f0ebe3">
+          <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px;font-size:14px">
+            <strong style="color:#2d2d2d"><%= c.author_name %></strong>
+            <time style="color:#aaa;font-size:13px"><%= dayjs(c.created_at).format('YYYY-MM-DD HH:mm') %></time>
+          </div>
+          <p style="margin:0;color:#444;line-height:1.7"><%= c.content %></p>
+        </div>
+      <% }) %>
+      <% if (comments.length === 0) { %>
+        <p style="color:#aaa;text-align:center;padding:20px 0">还没有评论，来说两句吧~</p>
+      <% } %>
+      <div style="margin-top:28px">
+        <h4 style="font-size:15px;margin:0 0 16px;color:#2d2d2d">发表评论</h4>
+        <div id="comment-msg" style="display:none" class="alert"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <input type="text" id="c-name" placeholder="昵称 *" required
+            style="border:1px solid #ede8e0;border-radius:6px;padding:10px 14px;font-size:14px;outline:none;font-family:inherit">
+          <input type="email" id="c-email" placeholder="邮箱（不公开）"
+            style="border:1px solid #ede8e0;border-radius:6px;padding:10px 14px;font-size:14px;outline:none;font-family:inherit">
+        </div>
+        <textarea id="c-content" rows="5" placeholder="说点什么..."
+          style="width:100%;border:1px solid #ede8e0;border-radius:6px;padding:10px 14px;font-size:14px;outline:none;font-family:inherit;resize:vertical;display:block;margin-bottom:12px"></textarea>
+        <button onclick="submitComment(<%= article.id %>)"
+          style="background:#c05a1f;color:#fff;border:none;padding:10px 28px;border-radius:6px;font-size:14px;cursor:pointer;font-weight:500">
+          提交评论
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="kb-footer">
+  <p><%= footerText %></p>
+  <% if (icpNumber) { %><p><a href="https://beian.miit.gov.cn" target="_blank"><%= icpNumber %></a></p><% } %>
+</footer>
+<script src="/js/main.js"></script>
+</body></html>

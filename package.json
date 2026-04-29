@@ -1,0 +1,25 @@
+{
+  "name": "magies-blog",
+  "version": "1.0.0",
+  "description": "Magies 个人动态博客",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^9.4.3",
+    "compression": "^1.7.4",
+    "dayjs": "^1.11.10",
+    "dotenv": "^17.3.1",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.2.0",
+    "express-session": "^1.17.3",
+    "helmet": "^7.1.0",
+    "marked": "^12.0.0",
+    "multer": "^1.4.5-lts.1",
+    "sanitize-html": "^2.12.1"
+  }
+}
