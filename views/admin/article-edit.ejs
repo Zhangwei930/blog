@@ -26,8 +26,12 @@
               <button type="button" onclick="ins('- ','')">列表</button>
               <button type="button" onclick="document.getElementById('img-upload').click()">🖼 图片</button>
               <input type="file" id="img-upload" accept="image/*" style="display:none" onchange="doUpload(this)">
+              <span style="flex:1"></span>
+              <button type="button" id="tab-edit" onclick="switchTab('edit')" style="background:#667eea;color:#fff;border-radius:4px;padding:3px 10px;font-size:12px">编辑</button>
+              <button type="button" id="tab-preview" onclick="switchTab('preview')" style="background:none;color:#718096;border-radius:4px;padding:3px 10px;font-size:12px">预览</button>
             </div>
             <textarea name="content" id="editor" placeholder="开始写作... 支持 Markdown 语法"><%= article?article.content:'' %></textarea>
+            <div id="preview-pane" class="markdown-body" style="display:none;min-height:400px;padding:20px;border:1px solid #e2e8f0;border-radius:0 0 8px 8px;background:#fff;overflow-y:auto"></div>
           </div>
           <div class="panel">
             <label class="form-label">文章摘要（可选）</label>
@@ -85,5 +89,25 @@ function ins(b,a){const t=document.getElementById('editor');const s=t.selectionS
 function addTag(e){if(e.key!=='Enter')return;e.preventDefault();const v=e.target.value.trim();if(!v)return;const d=document.getElementById('tag-container');const sp=document.createElement('span');sp.className='tag-item';sp.innerHTML=v+'<input type="hidden" name="tags" value="'+v+'"><button type="button" onclick="this.parentElement.remove()">×</button>';d.appendChild(sp);e.target.value='';}
 document.getElementById('tag-input').addEventListener('keydown',addTag);
 async function doUpload(input){const fd=new FormData();fd.append('image',input.files[0]);const r=await fetch('/admin/upload',{method:'POST',credentials:'same-origin',body:fd});const d=await r.json();if(d.success)ins('![图片]('+d.url+')','');}
+
+function switchTab(tab) {
+  const editor = document.getElementById('editor');
+  const pane = document.getElementById('preview-pane');
+  const btnEdit = document.getElementById('tab-edit');
+  const btnPreview = document.getElementById('tab-preview');
+  if (tab === 'preview') {
+    pane.innerHTML = marked.parse(editor.value || '');
+    pane.style.display = 'block';
+    editor.style.display = 'none';
+    btnPreview.style.background = '#667eea'; btnPreview.style.color = '#fff';
+    btnEdit.style.background = 'none'; btnEdit.style.color = '#718096';
+  } else {
+    editor.style.display = 'block';
+    pane.style.display = 'none';
+    btnEdit.style.background = '#667eea'; btnEdit.style.color = '#fff';
+    btnPreview.style.background = 'none'; btnPreview.style.color = '#718096';
+  }
+}
 </script>
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
 </body></html>
