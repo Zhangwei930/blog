@@ -15,14 +15,14 @@
 <div class="admin-layout"><%- include('../partials/admin-sidebar') %>
 <main class="admin-main">
   <div class="admin-topbar">
-    <div class="admin-topbar-title">分类管理</div>
+    <div class="admin-topbar-title">添加新分类</div>
     <div class="admin-topbar-right">
       <span style="font-size:13px;color:#718096;margin-right:12px">共 <%= total %> 个分类 · 第 <%= page %> / <%= totalPages %> 页</span>
       <button id="save-btn" class="btn btn-primary btn-sm save-order-btn" onclick="saveOrder()">💾 保存排序</button>
     </div>
   </div>
 
-  <div class="panel" style="max-width:680px;margin-bottom:24px"><h4>添加新分类</h4>
+  <div class="panel" style="max-width:680px;margin-bottom:24px">
     <form method="POST" action="/admin/categories/new"
       style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end">
       <div>
