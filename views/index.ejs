@@ -84,7 +84,7 @@
     <div class="kb-latest-grid">
       <% latestArticles.forEach(a => { %>
         <a href="/article/<%= a.slug %>" class="kb-latest-card">
-          <div class="kb-latest-cover">
+          <div class="kb-latest-cover<%= a.cover_image ? ' has-img' : '' %>">
             <% if (a.cover_image) { %>
               <img src="<%= a.cover_image %>" alt="">
             <% } else { %>
