@@ -216,6 +216,34 @@ router.post('/upload', auth, upload.single('image'), (req, res) => {
   res.json({ success: true, url: '/uploads/' + req.file.filename });
 });
 
+// ---- 图床管理 ----
+router.get('/images', auth, (req, res) => {
+  const uploadsDir = path.join(__dirname, '../../public/uploads');
+  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+  const imageExts = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp']);
+  const files = fs.readdirSync(uploadsDir)
+    .filter(f => imageExts.has(path.extname(f).toLowerCase()))
+    .map(f => {
+      const stat = fs.statSync(path.join(uploadsDir, f));
+      return { name: f, url: '/uploads/' + f, size: stat.size, mtime: stat.mtime };
+    })
+    .sort((a, b) => b.mtime - a.mtime);
+  res.render('admin/images', { title: '图床管理', admin: req.session.admin, files, blogName: getSetting('blog_name') });
+});
+
+router.post('/images/upload', auth, upload.array('images', 20), (req, res) => {
+  if (!req.files || req.files.length === 0) return res.json({ success: false, message: '未选择文件' });
+  const urls = req.files.map(f => '/uploads/' + f.filename);
+  res.json({ success: true, urls });
+});
+
+router.post('/images/:filename/delete', auth, (req, res) => {
+  const filename = path.basename(req.params.filename);
+  const filePath = path.join(__dirname, '../../public/uploads', filename);
+  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  res.redirect('/admin/images');
+});
+
 // ---- 博客设置 ----
 router.get('/settings', auth, (req, res) => {
   const settings = {};

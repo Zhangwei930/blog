@@ -1,0 +1,142 @@
+<%- include('../partials/admin-head') %>
+<div class="admin-layout">
+<%- include('../partials/admin-sidebar') %>
+<main class="admin-main">
+  <div class="admin-topbar">
+    <div class="admin-topbar-title">图床管理</div>
+    <div class="admin-topbar-right">
+      <span style="color:#718096;font-size:14px">共 <%= files.length %> 张图片</span>
+    </div>
+  </div>
+  <div class="admin-content">
+
+    <!-- 上传区域 -->
+    <div class="panel" style="margin-bottom:20px">
+      <div id="drop-zone" style="border:2px dashed #cbd5e0;border-radius:10px;padding:40px;text-align:center;cursor:pointer;transition:all .2s;background:#f7fafc" onclick="document.getElementById('file-input').click()">
+        <div style="font-size:40px;margin-bottom:10px">🖼️</div>
+        <div style="font-size:16px;color:#4a5568;font-weight:600">点击或拖拽图片到此上传</div>
+        <div style="font-size:13px;color:#a0aec0;margin-top:6px">支持 JPG、PNG、GIF、WebP，单文件最大 5MB，可批量上传</div>
+      </div>
+      <input type="file" id="file-input" multiple accept="image/*" style="display:none">
+      <div id="upload-progress" style="display:none;margin-top:16px">
+        <div style="background:#e2e8f0;border-radius:4px;height:6px;overflow:hidden">
+          <div id="progress-bar" style="background:#667eea;height:100%;width:0%;transition:width .3s"></div>
+        </div>
+        <div id="progress-text" style="font-size:13px;color:#718096;margin-top:6px;text-align:center">上传中...</div>
+      </div>
+      <div id="upload-result" style="margin-top:12px;display:none"></div>
+    </div>
+
+    <!-- 图片列表 -->
+    <% if (files.length === 0) { %>
+    <div class="panel" style="text-align:center;padding:60px;color:#a0aec0">
+      <div style="font-size:48px;margin-bottom:12px">📭</div>
+      <div>暂无图片，上传后在此管理</div>
+    </div>
+    <% } else { %>
+    <div id="image-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px">
+      <% files.forEach(function(f){ %>
+      <div class="image-card" style="background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08);transition:box-shadow .2s" data-url="<%= f.url %>">
+        <div style="position:relative;padding-top:66%;background:#f7fafc;overflow:hidden">
+          <img src="<%= f.url %>" alt="<%= f.name %>" loading="lazy"
+            style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;cursor:pointer"
+            onclick="openPreview('<%= f.url %>')">
+        </div>
+        <div style="padding:10px 12px">
+          <div style="font-size:12px;color:#718096;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="<%= f.name %>"><%= f.name %></div>
+          <div style="font-size:11px;color:#a0aec0;margin-top:2px"><%= (f.size/1024).toFixed(1) %> KB</div>
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <button onclick="copyUrl('<%= f.url %>', this)" class="btn btn-outline btn-sm" style="flex:1;font-size:12px">复制链接</button>
+            <form method="POST" action="/admin/images/<%= f.name %>/delete" onsubmit="return confirm('确定删除此图片？')">
+              <button type="submit" class="btn btn-sm" style="background:#fff5f5;color:#e53e3e;border:1px solid #fed7d7;font-size:12px">删除</button>
+            </form>
+          </div>
+          <div style="margin-top:6px">
+            <input type="text" value="<%= f.url %>" readonly onclick="this.select()"
+              style="width:100%;font-size:11px;border:1px solid #e2e8f0;border-radius:4px;padding:4px 6px;color:#718096;background:#f7fafc;box-sizing:border-box;cursor:text">
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+    <% } %>
+
+  </div>
+</main>
+</div>
+
+<!-- 预览弹窗 -->
+<div id="preview-modal" onclick="closePreview()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:none;align-items:center;justify-content:center;cursor:zoom-out">
+  <img id="preview-img" src="" style="max-width:90vw;max-height:90vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+</div>
+
+<script>
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor='#667eea'; dropZone.style.background='#ebf4ff'; });
+dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor='#cbd5e0'; dropZone.style.background='#f7fafc'; });
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.style.borderColor='#cbd5e0'; dropZone.style.background='#f7fafc';
+  uploadFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', () => uploadFiles(fileInput.files));
+
+function uploadFiles(files) {
+  if (!files.length) return;
+  const formData = new FormData();
+  for (const f of files) formData.append('images', f);
+  const progress = document.getElementById('upload-progress');
+  const bar = document.getElementById('progress-bar');
+  const text = document.getElementById('progress-text');
+  const result = document.getElementById('upload-result');
+  progress.style.display = 'block';
+  result.style.display = 'none';
+  bar.style.width = '0%';
+  const xhr = new XMLHttpRequest();
+  xhr.upload.onprogress = e => {
+    if (e.lengthComputable) { const pct = Math.round(e.loaded/e.total*100); bar.style.width=pct+'%'; text.textContent='上传中 '+pct+'%'; }
+  };
+  xhr.onload = () => {
+    progress.style.display = 'none';
+    try {
+      const data = JSON.parse(xhr.responseText);
+      if (data.success) {
+        result.style.display = 'block';
+        result.innerHTML = '<div style="color:#38a169;font-size:14px;text-align:center">✅ 上传成功！共 '+data.urls.length+' 张图片</div>';
+        setTimeout(() => location.reload(), 800);
+      } else {
+        result.style.display = 'block';
+        result.innerHTML = '<div style="color:#e53e3e;font-size:14px;text-align:center">❌ ' + (data.message||'上传失败') + '</div>';
+      }
+    } catch(e) { result.style.display='block'; result.innerHTML='<div style="color:#e53e3e">上传失败</div>'; }
+  };
+  xhr.onerror = () => { progress.style.display='none'; result.style.display='block'; result.innerHTML='<div style="color:#e53e3e">网络错误，上传失败</div>'; };
+  xhr.open('POST', '/admin/images/upload');
+  xhr.send(formData);
+}
+
+function copyUrl(url, btn) {
+  const base = window.location.origin;
+  navigator.clipboard.writeText(base + url).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '已复制！';
+    btn.style.background = '#f0fff4';
+    btn.style.borderColor = '#9ae6b4';
+    btn.style.color = '#38a169';
+    setTimeout(() => { btn.textContent = orig; btn.style = ''; btn.className = 'btn btn-outline btn-sm'; btn.style.flex='1'; btn.style.fontSize='12px'; }, 1500);
+  });
+}
+
+function openPreview(url) {
+  const modal = document.getElementById('preview-modal');
+  document.getElementById('preview-img').src = url;
+  modal.style.display = 'flex';
+}
+function closePreview() {
+  document.getElementById('preview-modal').style.display = 'none';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePreview(); });
+</script>
+</body></html>
