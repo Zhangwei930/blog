@@ -22,6 +22,11 @@
       <% categories.slice(0,5).forEach(cat => { %><a href="/category/<%= cat.slug %>"><%= cat.name %></a><% }) %>
       <a href="/about">关于</a>
     </nav>
+    <form class="kb-nav-search" action="/search" method="GET">
+      <svg class="kb-nav-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" name="q" class="kb-nav-search-input" placeholder="搜索文章…" autocomplete="off">
+      <button type="submit" class="kb-nav-search-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+    </form>
     <button class="kb-menu-toggle" onclick="document.querySelector('.kb-nav').classList.toggle('open')">☰</button>
   </div>
 </header>
@@ -40,14 +45,6 @@
         </div>
       </div>
       <p class="kb-hero-desc"><%= blogDesc %></p>
-      <form class="kb-search-form" action="/search" method="GET">
-        <svg class="kb-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" name="q" class="kb-search-input" placeholder="搜索文章标题或内容…" autocomplete="off">
-        <button type="submit" class="kb-search-btn">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          搜索
-        </button>
-      </form>
     </div>
     <div class="kb-hero-deco">
       <div class="kb-deco-sq"></div>
@@ -70,13 +67,6 @@
             <h3 class="kb-card-title"><a href="/category/<%= group.slug %>"><%= group.name %></a></h3>
             <div class="kb-card-header-right">
               <span class="kb-card-count"><%= group.total %> 篇</span>
-              <% if (group.articles.length > 3) { %>
-              <div class="kb-card-pager">
-                <button class="kb-pager-btn" onclick="catPage(this,-1)" disabled>‹</button>
-                <span class="kb-pager-info">1/<%= totalPages %></span>
-                <button class="kb-pager-btn" onclick="catPage(this,1)">›</button>
-              </div>
-              <% } %>
             </div>
           </div>
           <ul class="kb-article-list">
@@ -91,6 +81,13 @@
               <% }) %>
             <% } %>
           </ul>
+          <% if (group.articles.length > 3) { %>
+          <div class="kb-card-footer">
+            <button class="kb-pager-btn" onclick="catPage(this,-1)" disabled>← 上一页</button>
+            <span class="kb-pager-info">第 1 页 / 共 <%= totalPages %> 页</span>
+            <button class="kb-pager-btn" onclick="catPage(this,1)">下一页 →</button>
+          </div>
+          <% } %>
         </div>
       <% }) %>
     </div>
@@ -124,13 +121,10 @@
 
 <% } else if (searchQuery) { %>
 <div class="kb-page-wrap">
-  <div class="kb-search-result-hd">
-    <form class="kb-search-form kb-search-form--inline" action="/search" method="GET">
-      <svg class="kb-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" name="q" class="kb-search-input" value="<%= searchQuery %>" autocomplete="off">
-      <button type="submit" class="kb-search-btn">搜索<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
-    </form>
-    <span class="kb-page-count"><%= articles.length %> 个结果</span>
+  <div class="kb-page-hd">
+    <h1>🔍 搜索结果</h1>
+    <p>「<%= searchQuery %>」</p>
+    <span class="kb-page-count"><%= articles.length %> 篇</span>
   </div>
   <div class="kb-list-card">
     <% articles.forEach(a => { %>
@@ -195,7 +189,7 @@ function catPage(btn, dir) {
     el.style.display = (i >= page * 3 && i < (page + 1) * 3) ? 'flex' : 'none';
   });
   var info = card.querySelector('.kb-pager-info');
-  if (info) info.textContent = (page + 1) + '/' + totalPages;
+  if (info) info.textContent = '第 ' + (page + 1) + ' 页 / 共 ' + totalPages + ' 页';
   var btns = card.querySelectorAll('.kb-pager-btn');
   btns[0].disabled = page === 0;
   btns[1].disabled = page === totalPages - 1;

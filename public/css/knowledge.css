@@ -11,7 +11,14 @@
 .kb-nav{display:flex;gap:2px;flex:1}
 .kb-nav a{padding:7px 16px;border-radius:8px;color:#6b5c4e;font-size:14px;text-decoration:none;transition:all .2s;font-weight:400}
 .kb-nav a:hover,.kb-nav a.active{background:#fdf0e8;color:#c05a1f;font-weight:500}
-.kb-menu-toggle{display:none;background:none;border:none;font-size:22px;cursor:pointer;margin-left:auto;color:#6b5c4e}
+.kb-menu-toggle{display:none;background:none;border:none;font-size:22px;cursor:pointer;margin-left:8px;color:#6b5c4e}
+.kb-nav-search{display:flex;align-items:center;background:#f7f4f0;border:1.5px solid #e8d5c4;border-radius:40px;padding:0 5px 0 13px;height:34px;transition:border-color .2s,box-shadow .2s,background .2s;flex-shrink:0}
+.kb-nav-search:focus-within{border-color:#c05a1f;background:#fff;box-shadow:0 2px 12px rgba(192,90,31,.12)}
+.kb-nav-search-icon{color:#c05a1f;flex-shrink:0;margin-right:7px;opacity:.65}
+.kb-nav-search-input{border:none;outline:none;background:transparent;font-size:13px;color:#2d2520;width:150px;font-family:'Noto Sans SC',sans-serif}
+.kb-nav-search-input::placeholder{color:#c0b0a0}
+.kb-nav-search-btn{width:26px;height:26px;background:#c05a1f;border:none;border-radius:50%;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0}
+.kb-nav-search-btn:hover{background:#a04018}
 
 /* ── Hero ── */
 .kb-hero{background:linear-gradient(160deg,#fdf8f4 0%,#f7f0e8 100%);border-bottom:1px solid #e8e0d8}
@@ -54,11 +61,11 @@
 .kb-card-title a:hover{text-decoration:underline}
 .kb-card-header-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .kb-card-count{font-size:11px;color:#c05a1f;background:#fdf0e8;padding:2px 8px;border-radius:20px;font-weight:600;white-space:nowrap}
-.kb-card-pager{display:flex;align-items:center;gap:3px}
-.kb-pager-btn{width:22px;height:22px;border:1px solid #e8d5c4;background:#fff;border-radius:6px;cursor:pointer;font-size:14px;color:#c05a1f;display:inline-flex;align-items:center;justify-content:center;padding:0;line-height:1;transition:all .15s;font-family:inherit}
+.kb-card-footer{display:flex;align-items:center;justify-content:space-between;padding-top:10px;margin-top:6px;border-top:1px solid #f5f0ea}
+.kb-pager-btn{background:none;border:1px solid #e8d5c4;border-radius:6px;padding:4px 10px;font-size:12px;color:#c05a1f;cursor:pointer;transition:all .15s;font-family:'Noto Sans SC',sans-serif;white-space:nowrap}
 .kb-pager-btn:hover:not(:disabled){background:#fdf0e8;border-color:#c05a1f}
-.kb-pager-btn:disabled{color:#ddd;border-color:#f0ece6;cursor:default}
-.kb-pager-info{font-size:10.5px;color:#bbb;min-width:28px;text-align:center;white-space:nowrap}
+.kb-pager-btn:disabled{color:#ccc;border-color:#eee;cursor:default}
+.kb-pager-info{font-size:11.5px;color:#aaa;text-align:center;white-space:nowrap}
 .kb-article-list{list-style:none;min-height:156px}
 .kb-article-item{display:flex;align-items:flex-start;justify-content:space-between;padding:9px 0;border-bottom:1px dashed #f0ebe3;gap:10px;min-height:52px}
 .kb-article-item:last-child{border-bottom:none}
@@ -83,15 +90,7 @@
 .kb-latest-title{font-size:15px;font-weight:600;margin:0 0 8px;color:#1a1208;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .kb-latest-excerpt{font-size:13px;color:#999;line-height:1.65;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:0}
 
-/* ── 搜索框 ── */
-.kb-search-form{display:flex;align-items:center;background:#fff;border:1.5px solid rgba(192,90,31,.2);border-radius:60px;padding:7px 7px 7px 26px;box-shadow:0 8px 40px rgba(192,90,31,.1),0 2px 8px rgba(0,0,0,.05);width:100%;transition:border-color .25s,box-shadow .3s}
-.kb-search-form:focus-within{border-color:#c05a1f;box-shadow:0 12px 48px rgba(192,90,31,.18),0 2px 10px rgba(0,0,0,.07)}
-.kb-search-form--inline{flex:1}
-.kb-search-icon{color:#c05a1f;flex-shrink:0;margin-right:14px;opacity:.75}
-.kb-search-input{flex:1;border:none;outline:none;font-size:16px;color:#2d2520;background:transparent;font-family:'Noto Sans SC',sans-serif;padding:11px 0;min-width:0}
-.kb-search-input::placeholder{color:#c8b8a8;font-weight:300}
-.kb-search-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:linear-gradient(135deg,#d4631f 0%,#b84d18 100%);color:#fff;border:none;border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s,transform .2s,box-shadow .2s;box-shadow:0 4px 18px rgba(192,90,31,.38);white-space:nowrap;font-family:'Noto Sans SC',sans-serif;flex-shrink:0;letter-spacing:.3px}
-.kb-search-btn:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 8px 24px rgba(192,90,31,.48)}
+/* ── 搜索结果页 ── */
 
 /* ── 搜索结果页 ── */
 .kb-search-result-hd{display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:18px;border-bottom:2px solid #c05a1f}

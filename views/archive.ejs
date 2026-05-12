@@ -21,6 +21,11 @@
       <% categories.slice(0,5).forEach(cat => { %><a href="/category/<%= cat.slug %>"><%= cat.name %></a><% }) %>
       <a href="/about">关于</a>
     </nav>
+    <form class="kb-nav-search" action="/search" method="GET">
+      <svg class="kb-nav-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" name="q" class="kb-nav-search-input" placeholder="搜索文章…" autocomplete="off">
+      <button type="submit" class="kb-nav-search-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+    </form>
     <button class="kb-menu-toggle" onclick="document.querySelector('.kb-nav').classList.toggle('open')">☰</button>
   </div>
 </header>
