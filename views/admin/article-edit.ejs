@@ -25,6 +25,8 @@
               <button type="button" onclick="ins('> ','')">引用</button>
               <button type="button" onclick="ins('- ','')">列表</button>
               <button type="button" onclick="document.getElementById('img-upload').click()">🖼 图片</button>
+              <button type="button" onclick="wrapAlign('center')" title="居中">⬛居中</button>
+              <button type="button" onclick="wrapAlign('right')" title="居右">居右⬛</button>
               <input type="file" id="img-upload" accept="image/*" style="display:none" onchange="doUpload(this)">
               <span style="flex:1"></span>
               <button type="button" id="tab-edit" onclick="switchTab('edit')" style="background:#667eea;color:#fff;border-radius:4px;padding:3px 10px;font-size:12px">编辑</button>
@@ -89,6 +91,15 @@ function ins(b,a){const t=document.getElementById('editor');const s=t.selectionS
 function addTag(e){if(e.key!=='Enter')return;e.preventDefault();const v=e.target.value.trim();if(!v)return;const d=document.getElementById('tag-container');const sp=document.createElement('span');sp.className='tag-item';sp.innerHTML=v+'<input type="hidden" name="tags" value="'+v+'"><button type="button" onclick="this.parentElement.remove()">×</button>';d.appendChild(sp);e.target.value='';}
 document.getElementById('tag-input').addEventListener('keydown',addTag);
 async function doUpload(input){const fd=new FormData();fd.append('image',input.files[0]);const r=await fetch('/admin/upload',{method:'POST',credentials:'same-origin',body:fd});const d=await r.json();if(d.success)ins('![图片]('+d.url+')','');}
+
+function wrapAlign(dir) {
+  const t = document.getElementById('editor');
+  const s = t.selectionStart, e = t.selectionEnd;
+  const sel = t.value.substring(s, e) || '在此输入内容';
+  const wrapped = '<div style="text-align:' + dir + '">\n\n' + sel + '\n\n</div>';
+  t.value = t.value.substring(0, s) + wrapped + t.value.substring(e);
+  t.focus();
+}
 
 function switchTab(tab) {
   const editor = document.getElementById('editor');
