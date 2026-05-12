@@ -222,17 +222,23 @@ router.post('/upload', auth, upload.single('image'), (req, res) => {
 
 // ---- 图床管理 ----
 router.get('/images', auth, (req, res) => {
+  const perPage = 20;
+  const page = Math.max(1, parseInt(req.query.page) || 1);
   const uploadsDir = path.join(__dirname, '../../public/uploads');
   if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
   const imageExts = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp']);
-  const files = fs.readdirSync(uploadsDir)
+  const allFiles = fs.readdirSync(uploadsDir)
     .filter(f => imageExts.has(path.extname(f).toLowerCase()))
     .map(f => {
       const stat = fs.statSync(path.join(uploadsDir, f));
       return { name: f, url: '/uploads/' + f, size: stat.size, mtime: stat.mtime };
     })
     .sort((a, b) => b.mtime - a.mtime);
-  res.render('admin/images', { title: '图床管理', admin: req.session.admin, files, blogName: getSetting('blog_name') });
+  const total = allFiles.length;
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  const safePage = Math.min(page, totalPages);
+  const files = allFiles.slice((safePage - 1) * perPage, safePage * perPage);
+  res.render('admin/images', { title: '图床管理', admin: req.session.admin, files, total, page: safePage, totalPages, perPage, blogName: getSetting('blog_name') });
 });
 
 router.post('/images/upload', auth, upload.array('images', 20), (req, res) => {

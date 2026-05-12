@@ -5,7 +5,7 @@
   <div class="admin-topbar">
     <div class="admin-topbar-title">图床管理</div>
     <div class="admin-topbar-right">
-      <span style="color:#718096;font-size:14px">共 <%= files.length %> 张图片</span>
+      <span style="color:#718096;font-size:14px">共 <%= total %> 张 · 第 <%= page %> / <%= totalPages %> 页</span>
     </div>
   </div>
   <div class="admin-content">
@@ -58,6 +58,30 @@
         </div>
       </div>
       <% }) %>
+    </div>
+    <% } %>
+
+    <!-- 分页 -->
+    <% if (totalPages > 1) { %>
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:28px;padding-top:20px;border-top:1px solid #e2e8f0">
+      <% if (page > 1) { %>
+        <a href="?page=<%= page - 1 %>" class="btn btn-outline btn-sm">← 上一页</a>
+      <% } else { %>
+        <button class="btn btn-outline btn-sm" disabled style="opacity:.4;cursor:default">← 上一页</button>
+      <% } %>
+      <div style="display:flex;gap:4px">
+        <% const startP = Math.max(1, page - 2); const endP = Math.min(totalPages, page + 2); %>
+        <% if (startP > 1) { %><a href="?page=1" class="btn btn-outline btn-sm">1</a><% if (startP > 2) { %><span style="padding:0 4px;color:#a0aec0">…</span><% } %><% } %>
+        <% for (let p = startP; p <= endP; p++) { %>
+          <a href="?page=<%= p %>" class="btn btn-sm" style="<%= p === page ? 'background:#667eea;color:#fff;border-color:#667eea' : '' %>"><%= p %></a>
+        <% } %>
+        <% if (endP < totalPages) { %><% if (endP < totalPages - 1) { %><span style="padding:0 4px;color:#a0aec0">…</span><% } %><a href="?page=<%= totalPages %>" class="btn btn-outline btn-sm"><%= totalPages %></a><% } %>
+      </div>
+      <% if (page < totalPages) { %>
+        <a href="?page=<%= page + 1 %>" class="btn btn-outline btn-sm">下一页 →</a>
+      <% } else { %>
+        <button class="btn btn-outline btn-sm" disabled style="opacity:.4;cursor:default">下一页 →</button>
+      <% } %>
     </div>
     <% } %>
 
