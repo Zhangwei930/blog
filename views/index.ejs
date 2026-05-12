@@ -26,13 +26,17 @@
   </div>
 </header>
 
-<% if (!category) { %>
+<% if (!category && !searchQuery) { %>
 <div class="kb-hero">
   <div class="kb-hero-inner">
     <div class="kb-hero-content">
       <div class="kb-hero-eyebrow">PERSONAL BLOG</div>
       <h1 class="kb-hero-title"><%= blogName %></h1>
       <p class="kb-hero-desc"><%= blogDesc %></p>
+      <form class="kb-search-form" action="/search" method="GET">
+        <input type="text" name="q" class="kb-search-input" placeholder="搜索文章标题或内容…" autocomplete="off">
+        <button type="submit" class="kb-search-btn">搜索</button>
+      </form>
       <div class="kb-hero-stats">
         <div class="kb-stat"><span class="kb-stat-num"><%= totalArticles %></span><span class="kb-stat-label">篇文章</span></div>
         <div class="kb-stat"><span class="kb-stat-num"><%= categories.length %></span><span class="kb-stat-label">个分类</span></div>
@@ -105,6 +109,33 @@
   <% } %>
 </div>
 
+<% } else if (searchQuery) { %>
+<div class="kb-page-wrap">
+  <div class="kb-search-result-hd">
+    <form class="kb-search-form kb-search-form--inline" action="/search" method="GET">
+      <input type="text" name="q" class="kb-search-input" value="<%= searchQuery %>" autocomplete="off">
+      <button type="submit" class="kb-search-btn">搜索</button>
+    </form>
+    <span class="kb-page-count"><%= articles.length %> 个结果</span>
+  </div>
+  <div class="kb-list-card">
+    <% articles.forEach(a => { %>
+      <div class="kb-list-item">
+        <div class="kb-list-main">
+          <a href="/article/<%= a.slug %>" class="kb-list-link"><%= a.title %></a>
+          <% if (a.excerpt) { %><p class="kb-list-excerpt"><%= a.excerpt.slice(0,80) %>…</p><% } %>
+        </div>
+        <div class="kb-list-right">
+          <% if (a.category_name) { %><span class="kb-list-cat"><%= a.category_name %></span><% } %>
+          <span class="kb-list-views"><%= a.views %> 阅读</span>
+        </div>
+      </div>
+    <% }) %>
+    <% if (articles.length === 0) { %>
+      <div style="text-align:center;padding:48px;color:#aaa">未找到与「<%= searchQuery %>」相关的文章</div>
+    <% } %>
+  </div>
+</div>
 <% } else { %>
 <div class="kb-page-wrap">
   <div class="kb-page-hd">

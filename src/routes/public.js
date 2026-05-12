@@ -57,10 +57,37 @@ router.get('/', (req, res, next) => {
       totalArticles:  totalArticles,
       totalViews:     totalViews,
       category: null,
+      searchQuery: null,
       articles: [],
       page: 1,
       totalPages: 1,
       title: ''
+    }));
+  } catch(e) { next(e); }
+});
+
+// 搜索
+router.get('/search', (req, res, next) => {
+  try {
+    const q = (req.query.q || '').trim();
+    if (!q) return res.redirect('/');
+    const kw = `%${q}%`;
+    const articles = db.prepare(
+      'SELECT a.id,a.title,a.slug,a.excerpt,a.views,a.created_at,c.name as category_name,c.slug as category_slug ' +
+      'FROM articles a LEFT JOIN categories c ON a.category_id=c.id ' +
+      'WHERE a.status=? AND (a.title LIKE ? OR a.content LIKE ?) ORDER BY a.created_at DESC'
+    ).all(PUB, kw, kw);
+    res.render('index', Object.assign({}, getBaseData(), {
+      articles,
+      searchQuery: q,
+      category: null,
+      categoryGroups: [],
+      latestArticles: [],
+      totalArticles: 0,
+      totalViews: 0,
+      page: 1,
+      totalPages: 1,
+      title: `搜索：${q}`
     }));
   } catch(e) { next(e); }
 });
@@ -111,6 +138,7 @@ router.get('/category/:slug', (req, res, next) => {
       page: page,
       totalPages: Math.ceil(total / perPage),
       category: category,
+      searchQuery: null,
       categoryGroups: [],
       latestArticles: [],
       totalArticles: total,
