@@ -84,9 +84,9 @@
     <div class="kb-latest-grid">
       <% latestArticles.forEach(a => { %>
         <a href="/article/<%= a.slug %>" class="kb-latest-card">
-          <div class="kb-latest-cover" style="display:flex;align-items:center;justify-content:center;<%= a.cover_image ? '' : 'background:linear-gradient(135deg,#fdf0e8,#e8d5c4)' %>">
+          <div class="kb-latest-cover">
             <% if (a.cover_image) { %>
-              <img src="<%= a.cover_image %>" alt="<%= a.title %>" style="width:100%;height:auto;display:block">
+              <img src="<%= a.cover_image %>" alt="<%= a.title %>">
             <% } else { %>
               <span style="font-size:36px">📝</span>
             <% } %>
