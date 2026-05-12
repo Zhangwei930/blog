@@ -6,6 +6,11 @@ const dayjs   = require('dayjs');
 
 const PUB = 'published';
 
+function extractFirstImage(content) {
+  const m = content && content.match(/!\[.*?\]\((https?:\/\/[^\)]+)\)/);
+  return m ? m[1] : null;
+}
+
 function getSetting(key) {
   const row = db.prepare('SELECT value FROM settings WHERE key=?').get(key);
   return row ? row.value : '';
@@ -43,7 +48,9 @@ router.get('/', (req, res, next) => {
       'SELECT a.*, c.name as category_name FROM articles a ' +
       'LEFT JOIN categories c ON a.category_id=c.id ' +
       'WHERE a.status=? ORDER BY a.created_at DESC LIMIT 6'
-    ).all(PUB);
+    ).all(PUB).map(a => Object.assign({}, a, {
+      cover_image: a.cover_image || extractFirstImage(a.content)
+    }));
     res.render('index', Object.assign({}, base, {
       categoryGroups: categoryGroups,
       latestArticles: latestArticles,

@@ -34,6 +34,10 @@ app.use(limiter);
 const commentLimiter = rateLimit({ windowMs: 60 * 1000, max: 5 });
 
 // 静态文件 & 模板
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static(path.join(__dirname, '../public/uploads')));
 app.use(express.static(path.join(__dirname, '../public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views'));
