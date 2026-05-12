@@ -86,7 +86,7 @@
         <a href="/article/<%= a.slug %>" class="kb-latest-card">
           <div class="kb-latest-cover" style="display:flex;align-items:center;justify-content:center;<%= a.cover_image ? '' : 'background:linear-gradient(135deg,#fdf0e8,#e8d5c4)' %>">
             <% if (a.cover_image) { %>
-              <img src="<%= a.cover_image %>" alt="<%= a.title %>" style="width:100%;height:100%;object-fit:contain;display:block;background:#f7fafc">
+              <img src="<%= a.cover_image %>" alt="<%= a.title %>" style="width:100%;height:auto;display:block">
             <% } else { %>
               <span style="font-size:36px">📝</span>
             <% } %>
