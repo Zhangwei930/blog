@@ -183,8 +183,13 @@ router.post('/comments/:id/delete', auth, (req, res) => {
 
 // ---- 分类管理 ----
 router.get('/categories', auth, (req, res) => {
-  const categories = db.prepare('SELECT c.*, COUNT(a.id) as article_count FROM categories c LEFT JOIN articles a ON a.category_id=c.id GROUP BY c.id ORDER BY c.sort_order ASC, c.id ASC').all();
-  res.render('admin/categories', { title: '分类管理', admin: req.session.admin, categories, blogName: getSetting('blog_name') });
+  const perPage = 10;
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const total = db.prepare('SELECT COUNT(*) as c FROM categories').get().c;
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  const safePage = Math.min(page, totalPages);
+  const categories = db.prepare('SELECT c.*, COUNT(a.id) as article_count FROM categories c LEFT JOIN articles a ON a.category_id=c.id GROUP BY c.id ORDER BY c.sort_order ASC, c.id ASC LIMIT ? OFFSET ?').all(perPage, (safePage - 1) * perPage);
+  res.render('admin/categories', { title: '分类管理', admin: req.session.admin, categories, total, page: safePage, totalPages, blogName: getSetting('blog_name') });
 });
 
 
