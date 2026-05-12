@@ -39,7 +39,7 @@ router.get('/', (req, res, next) => {
     const cats = db.prepare('SELECT * FROM categories ORDER BY sort_order ASC, id ASC').all();
     const categoryGroups = cats.map(cat => {
       const arts = db.prepare(
-        'SELECT id,title,slug,views FROM articles WHERE category_id=? AND status=? ORDER BY created_at DESC LIMIT 8'
+        'SELECT id,title,slug,views FROM articles WHERE category_id=? AND status=? ORDER BY created_at DESC'
       ).all(cat.id, PUB);
       const total = db.prepare('SELECT COUNT(*) as c FROM articles WHERE category_id=? AND status=?').get(cat.id, PUB).c;
       return Object.assign({}, cat, { articles: arts, total: total });
