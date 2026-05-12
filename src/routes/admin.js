@@ -31,7 +31,7 @@ function getSetting(key) {
   return row ? row.value : '';
 }
 function slugify(text) {
-  return text.toLowerCase().replace(/[^\w\u4e00-\u9fa5]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 100);
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 100);
 }
 
 // 登录页
@@ -199,8 +199,12 @@ router.post('/categories/reorder', auth, (req, res) => {
   res.json({ success: true });
 });
 router.post('/categories/new', auth, (req, res) => {
-  const { name, description } = req.body;
-  db.prepare('INSERT OR IGNORE INTO categories(name,slug,description) VALUES(?,?,?)').run(name, slugify(name), description || '');
+  const { name, slug, description } = req.body;
+  const finalSlug = slug
+    ? slug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+    : slugify(name);
+  const safeSlug = finalSlug || `cat-${Date.now()}`;
+  db.prepare('INSERT OR IGNORE INTO categories(name,slug,description) VALUES(?,?,?)').run(name, safeSlug, description || '');
   res.redirect('/admin/categories');
 });
 
