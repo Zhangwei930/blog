@@ -81,13 +81,11 @@
               <% }) %>
             <% } %>
           </ul>
-          <% if (group.articles.length > 3) { %>
           <div class="kb-card-footer">
             <button class="kb-pager-btn" onclick="catPage(this,-1)" disabled>← 上一页</button>
             <span class="kb-pager-info">第 1 页 / 共 <%= totalPages %> 页</span>
-            <button class="kb-pager-btn" onclick="catPage(this,1)">下一页 →</button>
+            <button class="kb-pager-btn" onclick="catPage(this,1)" <%= totalPages <= 1 ? 'disabled' : '' %>>下一页 →</button>
           </div>
-          <% } %>
         </div>
       <% }) %>
     </div>
